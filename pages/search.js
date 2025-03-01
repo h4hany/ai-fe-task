@@ -4,11 +4,13 @@ import {Book} from "@/models/Book";
 import BookCard from "@/components/BookCard";
 import {useRouter} from "next/router";
 import {searchBook} from "@/services/bookService";
+import Loading from "@/components/loading";
 
 export default function Search() {
     const [bookId, setBookId] = useState('');
     const [book, setBook] = useState(null);
     const router = useRouter();
+    const [loading, setLoading] = useState(false);
 
     const handleRedirect = (id) => {
         router.push(`/analysis/${id}`);
@@ -16,11 +18,13 @@ export default function Search() {
     };
     const handleSearch = async (e) => {
         e.preventDefault();
+        setLoading(true)
+
         try {
             const response = await searchBook(bookId)
             if (response) {
                 const selectedBook = Book.fromJSON(response)
-
+                setLoading(false)
                 setBook(selectedBook)
             }
         } catch (error) {
@@ -50,10 +54,11 @@ export default function Search() {
                     </form>
 
                 </div>
-
-                <div className="grid ">
+                {loading && <Loading/>}
+                {!loading && book && <div className="grid ">
                     {book && <BookCard key={book.id} book={book} handleRedirect={handleRedirect}/>}
-                </div>
+                </div>}
+
             </div>
         </Layout>
     );
